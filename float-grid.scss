@@ -1,0 +1,77 @@
+// BREAKPOINTS
+// Note 1: Maybe use EMs?
+// Note 2: You can have 1 or more breakpoints.
+$medium: 480px;
+$normal: 768px;
+$large: 960px;
+
+$float-grid-breakpoints: $medium, $normal, $large;
+
+// Remove if defined elsewhere.
+.clearfix {
+  &:before, &:after {display: table;content: "";}
+  &:after {clear: both;}
+}
+
+/// Generates floated grid inside the element. Should be applied only
+/// on direct parent for clearfix to work. Every direct child is targeted
+/// by default. Change $selector to select subset of children for the grid.
+///
+/// @param {list} $column_list - Number of colums for each breakpoint interval.
+/// @param {number} $gutter [0.5] - Gutter width in percents.
+/// @param {string} $selector [' > :nth-child(n)'] - CSS selector for child elements.
+@mixin float-grid($columns_list, $gutter: 0.5, $selector: ' > :nth-child(n)') {
+  @extend .clearfix;
+  // Remove outer margins of the grid items with negative margins.
+  margin-left: -$gutter * 1%;
+  margin-right: -$gutter * 1%;
+  &#{$selector} {
+    float: left;
+    margin: $gutter * 1%;
+    margin: $gutter * 1%;
+    // Default width.
+    @include float-grid-width(nth($columns_list, 1), $gutter);
+    // Columns at breakpoints.
+    @for $i from 1 through length($float-grid-breakpoints) {
+      @media min-width(nth($float-grid-breakpoints, $i)) {
+        @include float-grid-width(nth($columns_list, $i+1), $gutter);
+      }
+    }
+  }
+}
+
+/// Helper mixin used in float-grid mixin.
+@mixin float-grid-width($columns, $gutter) {
+  width: 100/$columns - $gutter * 2%;
+}
+
+// EXAMPLE USAGE:
+// ==============
+// Including
+// ---------
+// .float-grid-1-2-3-4 {
+//  @include float-grid((1 2 3 4));
+// }
+//
+// List parameter
+// --------------
+// (1 2 3 4) -->
+// 0 - 479px     : 1 column
+// 480px - 767px : 2 columns
+// 768px - 959px : 3 columns
+// >= 960px      : 4 columns
+//
+// Using classes
+// -------------
+// You should normally define grids as classes, extend them or put them in
+// your HTML markup.
+// .my-class {
+//   @extend .float-grid-1-2-3-4;
+// }
+
+.float-grid-1-2-3-4 {
+  @include float-grid((1 2 3 4));
+}
+.float-grid-1-1-2-2 {
+  @include float-grid((1 1 2 2));
+}
